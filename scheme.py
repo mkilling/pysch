@@ -22,7 +22,6 @@ def exp_as_list(exp):
 		exp = exp[1:-1]
 	while len(exp) > 0:
 		first, exp = get_first(exp)
-		print first, exp
 		ret.append(first)
 	return ret
 
@@ -45,7 +44,7 @@ class PlusProc(Proc):
 	def __init__(self, env):
 		Proc.__init__(self, env)
 	def apply(self, args):
-		return str(map(float, map(eval, args)).sum())
+		return str(sum(map(float, map(lambda x: eval(x, self.env), args))))
 
 def lookup_var(name, env):
 	for frame in env:
@@ -129,6 +128,15 @@ def is_lambda(exp):
 def is_application(exp):
 	return len(exp_as_list(exp)) > 1
 
+def is_if(exp):
+	return False
+
+def is_cond(exp):
+	return exp.startswith("(cond")
+	
+def is_begin(exp):
+	return exp.startswith("(begin")
+
 def eval(exp, env):
 	if is_self_evaluating(exp):
 		return exp
@@ -151,8 +159,9 @@ def eval(exp, env):
 	elif is_application(exp):
 		lst = exp_as_list(exp)
 		if lst[0] == '+':
-			return PlusProc(env)
+			proc = PlusProc(env)
 		else:
-			return eval(lst[0], env).apply(lst[1:])
+			proc = eval(lst[0], env)
+		return proc.apply(lst[1:])
 	else:
 		raise "unknown expression type " + exp
