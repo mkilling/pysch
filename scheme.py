@@ -37,14 +37,34 @@ class CompoundProcedure(Proc):
 		lst = exp_as_list(exp)
 		self.params = exp_as_list(lst[1])
 		self.body = lst[2:]
+		print "body ", self.body
 	def apply(self, args):
-		return eval_sequence(self.body, extend_environment(dict.fromkeys(self.params, args), self.env))
+		new_env = extend_environment(dict(zip(self.params, args)), self.env)
+		stmts = eval_sequence(self.body, new_env)
+		return stmts[-1]
 
 class PlusProc(Proc):
 	def __init__(self, env):
 		Proc.__init__(self, env)
 	def apply(self, args):
 		return str(sum(map(float, map(lambda x: eval(x, self.env), args))))
+		
+class MinusProc(Proc):
+	def __init__(self, env):
+		Proc.__init__(self, env)
+	def apply(self, args):
+		acc = float(eval(args[0], self.env))
+		acc -= sum(map(float, map(lambda x: eval(x, self.env), args[1:])))
+		return str(acc)
+
+class MultProc(Proc):
+	def __init__(self, env):
+		Proc.__init__(self, env)
+	def apply(self, args):
+		acc = 1
+		for exp in args:
+			acc *= float(eval(exp, self.env))
+		return str(acc)
 
 def lookup_var(name, env):
 	for frame in env:
@@ -89,9 +109,7 @@ def eval_if(exp, env):
 		return eval(lst[2], env)
 
 def eval_sequence(exps, env):
-	for exp in exps:
-		lst = eval(exp, env)
-	return lst
+	return map(lambda exp: eval(exp, env), exps)
 
 def is_true(exp, env):
 	pass
@@ -160,6 +178,10 @@ def eval(exp, env):
 		lst = exp_as_list(exp)
 		if lst[0] == '+':
 			proc = PlusProc(env)
+		elif lst[0] == '-':
+			proc = MinusProc(env)
+		elif lst[0] == '*':
+			proc = MultProc(env)
 		else:
 			proc = eval(lst[0], env)
 		return proc.apply(lst[1:])
