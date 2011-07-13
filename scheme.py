@@ -69,7 +69,7 @@ def lookup_var(name, env):
 	for frame in env:
 		if name in frame:
 			return frame[name]
-	raise "var not found: " + name
+	raise Exception("var not found: " + name)
 
 def define_var(name, val, env):
 	if not name in env[0]:
@@ -83,14 +83,14 @@ def set_var(name, val, env):
 		if name in frame:
 			frame[name] = val
 			return
-	raise "var not found: " + name
+	raise Exception("var not found: " + name)
 
 
 def quoted_value(exp):
 	if exp.startswith("'"):
 		return exp[1:]
 	else:
-		raise "not implemented"
+		raise Exception("not implemented")
 		
 def eval_assignment(exp, env):
 	parts = exp.strip('()').split(' ')
@@ -102,16 +102,16 @@ def eval_definition(exp, env):
 
 def eval_if(exp, env):
 	lst = exp_as_list(exp)
-	if is_true(lst[0], env):
-		return eval(lst[1], env)
-	else:
+	if is_true(lst[1], env):
 		return eval(lst[2], env)
+	else:
+		return eval(lst[3], env)
 
 def eval_sequence(exps, env):
 	return map(lambda exp: eval(exp, env), exps)
 
 def is_true(exp, env):
-	pass
+	return eval(exp, env) != '#f'
 
 def is_number(s):
 	try:
@@ -124,8 +124,11 @@ def is_string(s):
 	import re
 	return re.match("\\\"[^\\\"]*\\\"$", s) != None
 
+def is_bool(s):
+	return s == '#f'
+
 def is_self_evaluating(exp):
-	return is_string(exp) or is_number(exp)
+	return is_string(exp) or is_number(exp) or is_bool(exp)
 
 def is_variable(exp):
 	return not (exp.startswith("(") or " " in exp)
@@ -146,7 +149,7 @@ def is_application(exp):
 	return len(exp_as_list(exp)) > 1
 
 def is_if(exp):
-	return False
+	return exp.startswith("(if")
 
 def is_cond(exp):
 	return exp.startswith("(cond")
@@ -185,4 +188,4 @@ def eval(exp, env):
 			proc = eval(lst[0], env)
 		return proc.apply(lst[1:])
 	else:
-		raise "unknown expression type " + exp
+		raise Exception("unknown expression type " + exp)

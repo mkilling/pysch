@@ -22,6 +22,10 @@ class TestScheme(unittest.TestCase):
 		self.assertEqual(scheme.eval("a", env), '10.0')
 		scheme.eval("(set! a 12.0)", env)
 		self.assertEqual(scheme.eval("a", env), '12.0')
+		
+	def test_if(self):
+		self.assertEqual(scheme.eval("(if #f 1.0 10.0)", [{}]), '10.0')
+		self.assertEqual(scheme.eval("(if 10 1.0 10.0)", [{}]), '1.0')
 
 if __name__ == '__main__':
 	unittest.main()
