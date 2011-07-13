@@ -37,7 +37,6 @@ class CompoundProcedure(Proc):
 		lst = exp_as_list(exp)
 		self.params = exp_as_list(lst[1])
 		self.body = lst[2:]
-		print "body ", self.body
 	def apply(self, args):
 		new_env = extend_environment(dict(zip(self.params, args)), self.env)
 		stmts = eval_sequence(self.body, new_env)

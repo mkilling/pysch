@@ -12,6 +12,16 @@ class TestScheme(unittest.TestCase):
 	
 	def test_lambda(self):
 		self.assertEqual(scheme.eval("((lambda (a b) (+ a b)) 5 7)", [{}]), '12.0')
+	
+	def test_procedural_lambda(self):
+		self.assertEqual(scheme.eval("((lambda (a b) (+ 1 1) (+ a b)) 5 7)", [{}]), '12.0')
+	
+	def test_assignment(self):
+		env = [{}]
+		scheme.eval("(define a 10.0)", env)
+		self.assertEqual(scheme.eval("a", env), '10.0')
+		scheme.eval("(set! a 12.0)", env)
+		self.assertEqual(scheme.eval("a", env), '12.0')
 
 if __name__ == '__main__':
 	unittest.main()
